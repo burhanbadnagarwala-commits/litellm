@@ -1,29 +1,39 @@
-name: Build and Push GHCR Image
+name: Deploy to Hugging Face Space
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Git LFS
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git-lfs
+          git lfs install
 
-      - name: Build Image
-        run: docker build -t ghcr.io/${{ github.repository }}:latest .
+      - name: Clone Hugging Face Space
+        run: |
+          git clone https://huggingface.co/spaces/Burhanuddin-infinity/Infinity-Ai-Backend hf-space
 
-      - name: Push Image
-        run: docker push ghcr.io/${{ github.repository }}:latest
+      - name: Copy Files
+        run: |
+          rsync -av --exclude hf-space --exclude .git . hf-space/
+
+      - name: Commit and Push
+        run: |
+          cd hf-space
+          git config user.email "github-action@users.noreply.github.com"
+          git config user.name "github-actions"
+
+          git add .
+          git commit -m "Auto deploy from GitHub" || echo "No changes"
+
+          git push https://Burhanuddin-infinity:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Burhanuddin-infinity/Infinity-Ai-Backend main
