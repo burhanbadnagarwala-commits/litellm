@@ -13,6 +13,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           lfs: true
 
       - name: Install Git LFS
@@ -32,4 +33,4 @@ jobs:
 
       - name: Push to Hugging Face
         run: |
-          git push hf main --force
+          git push hf main
