@@ -13,10 +13,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Push to Hugging Face Space
+      - name: Install Git LFS
+        run: |
+          sudo apt-get install git-lfs
+          git lfs install
+
+      - name: Configure Git User
         run: |
           git config --global user.email "github-actions@users.noreply.github.com"
           git config --global user.name "github-actions"
-          git remote add hf https://Burhanuddin-infinity:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Burhanuddin-infinity/Infinity-Ai-Backend
+
+      - name: Add Hugging Face Remote and Push
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git remote add hf https://Burhanuddin-infinity:${HF_TOKEN}@huggingface.co/spaces/Burhanuddin-infinity/Infinity-Ai-Backend
           git pull --rebase hf main || echo "No remote updates"
-          git push hf main
+          git lfs push --all hf main || git push hf main
