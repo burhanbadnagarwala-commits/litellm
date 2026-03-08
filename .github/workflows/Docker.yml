@@ -1,4 +1,4 @@
-name: Deploy to Hugging Face Space
+name: Sync Repo to Hugging Face Space
 
 on:
   push:
@@ -6,34 +6,20 @@ on:
       - main
 
 jobs:
-  deploy:
+  sync-to-hf:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Git LFS
+      - name: Push to Hugging Face Space
         run: |
-          sudo apt-get update
-          sudo apt-get install -y git-lfs
-          git lfs install
+          git config --global user.email "github-actions@users.noreply.github.com"
+          git config --global user.name "github-actions"
 
-      - name: Clone Hugging Face Space
-        run: |
-          git clone https://huggingface.co/spaces/Burhanuddin-infinity/Infinity-Ai-Backend hf-space
+          git remote add hf https://Burhanuddin-infinity:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Burhanuddin-infinity/Infinity-Ai-Backend
 
-      - name: Copy Files
-        run: |
-          rsync -av --exclude hf-space --exclude .git . hf-space/
-
-      - name: Commit and Push
-        run: |
-          cd hf-space
-          git config user.email "github-action@users.noreply.github.com"
-          git config user.name "github-actions"
-
-          git add .
-          git commit -m "Auto deploy from GitHub" || echo "No changes"
+          git push hf main --force          git commit -m "Auto deploy from GitHub" || echo "No changes"
 
           git push https://Burhanuddin-infinity:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Burhanuddin-infinity/Infinity-Ai-Backend main
