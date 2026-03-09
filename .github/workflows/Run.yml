@@ -18,7 +18,7 @@ jobs:
 
       - name: Install prisma-client-py
         run: |
-          pip install prisma-client-py
+          pip install prisma
 
       - name: Install prisma CLI
         run: |
