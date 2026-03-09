@@ -1,35 +1,37 @@
-name: Sync Repo to Hugging Face Space
+name: Build Prisma and Push Repo
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch
 
 jobs:
-  sync-to-hf:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout source repo
         uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
+          node-version: "20"
 
-      - name: Install Git LFS
+      - name: Install Prisma
         run: |
-          sudo apt-get update
-          sudo apt-get install -y git-lfs
-          git lfs install
+          npm install prisma @prisma/client
 
-      - name: Configure Git
+      - name: Run Prisma Generate
         run: |
-          git config --global user.email "github-actions@users.noreply.github.com"
+          npx prisma generate
+
+      - name: Push to new repo
+        run: |
           git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
 
-      - name: Add Hugging Face Remote
-        run: |
-          git remote add hf https://Burhanuddin-infinity:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Burhanuddin-infinity/Infinity-Ai-Backend
+          git remote add target https://x-access-token:${{ secrets.TARGET_REPO_TOKEN }}@github.com/burhanbadnagarwala-commits/litellm-built.git
 
-      - name: Force Push to Hugging Face
-        run: |
-          git push hf main --force
+          git add .
+          git commit -m "Build with Prisma client" || echo "Nothing to commit"
+
+          git push target HEAD:main --force
