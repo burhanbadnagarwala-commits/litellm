@@ -16,17 +16,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install prisma-client-py
+      - name: Install Prisma Python
         run: |
           pip install prisma
 
-      - name: Install prisma CLI
-        run: |
-          npm install -g prisma
-
       - name: Generate Prisma client
         run: |
-          prisma generate
+          python -m prisma generate
 
       - name: Push built repo
         run: |
@@ -35,9 +31,6 @@ jobs:
 
           git remote add target https://x-access-token:${{ secrets.TARGET_REPO_TOKEN }}@github.com/burhanbadnagarwala-commits/litellm-built.git
 
-          git add .
-          git commit -m "Generated prisma client" || echo "No changes"
-          git push target HEAD:main --force
           git add .
           git commit -m "Generated prisma client" || echo "No changes"
           git push target HEAD:main --force
