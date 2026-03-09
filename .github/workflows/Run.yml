@@ -1,4 +1,4 @@
-name: Build Prisma and Push Repo
+name: Build Prisma and Push
 
 on:
   workflow_dispatch
@@ -8,23 +8,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source repo
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          node-version: "20"
+          python-version: "3.11"
 
-      - name: Install Prisma
+      - name: Install prisma-client-py
         run: |
-          npm install prisma @prisma/client
+          pip install prisma-client-py
 
-      - name: Run Prisma Generate
+      - name: Install prisma CLI
         run: |
-          npx prisma generate
+          npm install -g prisma
 
-      - name: Push to new repo
+      - name: Generate Prisma client
+        run: |
+          prisma generate
+
+      - name: Push built repo
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
@@ -32,6 +36,5 @@ jobs:
           git remote add target https://x-access-token:${{ secrets.TARGET_REPO_TOKEN }}@github.com/burhanbadnagarwala-commits/litellm-built.git
 
           git add .
-          git commit -m "Build with Prisma client" || echo "Nothing to commit"
-
+          git commit -m "Generated prisma client" || echo "No changes"
           git push target HEAD:main --force
