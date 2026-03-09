@@ -38,3 +38,6 @@ jobs:
           git add .
           git commit -m "Generated prisma client" || echo "No changes"
           git push target HEAD:main --force
+          git add .
+          git commit -m "Generated prisma client" || echo "No changes"
+          git push target HEAD:main --force
