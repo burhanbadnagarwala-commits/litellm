@@ -1,36 +1,39 @@
 name: Build Prisma and Push
 
 on:
-  workflow_dispatch
+workflow_dispatch
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+```
+steps:
+  - name: Checkout source repo
+    uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+  - name: Setup Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.11"
 
-      - name: Install Prisma Python
-        run: |
-          pip install prisma
+  - name: Install Prisma Python
+    run: |
+      pip install prisma
 
-      - name: Generate Prisma client
-        run: |
-          python -m prisma generate
+  - name: Generate Prisma client
+    run: |
+      python -m prisma generate
 
-      - name: Push built repo
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+  - name: Push built repo
+    run: |
+      git config --global user.name "github-actions"
+      git config --global user.email "actions@github.com"
 
-          git remote add target https://x-access-token:${{ secrets.TARGET_REPO_TOKEN }}@github.com/burhanbadnagarwala-commits/litellm-built.git
+      # Replace origin with token-authenticated repo
+      git remote set-url origin https://x-access-token:${{ secrets.TARGET_REPO_TOKEN }}@github.com/burhanbadnagarwala-commits/litellm-built.git
 
-          git add .
-          git commit -m "Generated prisma client" || echo "No changes"
-          git push target HEAD:main --force
+      git add .
+      git commit -m "Generated prisma client" || echo "No changes"
+      git push origin main --force
+```
