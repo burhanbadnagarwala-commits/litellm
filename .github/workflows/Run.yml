@@ -24,7 +24,7 @@ jobs:
 
       - name: Generate Prisma Client
         # Adjust the --schema path if your schema is located elsewhere
-        run: python -m prisma generate
+        run: python -m prisma generate --output=./generated/prisma
 
       - name: Commit and Push
         uses: stefanzweifel/git-auto-commit-action@v5
