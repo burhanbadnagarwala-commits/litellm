@@ -27,7 +27,7 @@ jobs:
       - name: Generate Prisma Client
         run: |
           # Generate to default site-packages first
-          python -m prisma generate --schema=./prisma/schema.prisma
+          python -m prisma generate
           
           # FIND where it was generated and COPY it to your repo folder
           # This command finds the 'prisma' package folder and copies its contents
