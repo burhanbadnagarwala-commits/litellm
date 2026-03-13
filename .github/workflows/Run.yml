@@ -20,14 +20,22 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install prisma
+          pip install prisma litellm
+          # Ensure the target folder exists in your repo
+          mkdir -p generated/prisma
 
       - name: Generate Prisma Client
-        # Adjust the --schema path if your schema is located elsewhere
-        run: python -m prisma generate --output=./generated/prisma
+        run: |
+          # Generate to default site-packages first
+          python -m prisma generate --schema=./prisma/schema.prisma
+          
+          # FIND where it was generated and COPY it to your repo folder
+          # This command finds the 'prisma' package folder and copies its contents
+          PRISMA_PATH=$(python -c "import prisma; import os; print(os.path.dirname(prisma.__file__))")
+          cp -r $PRISMA_PATH/* ./generated/prisma/
 
       - name: Commit and Push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: auto-generate prisma client for LiteLLM"
-          file_pattern: 'generated/prisma/*'
+          commit_message: "chore: manual copy of prisma client"
+          file_pattern: 'generated/prisma/**'
