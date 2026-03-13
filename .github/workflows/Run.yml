@@ -1,9 +1,6 @@
 name: Generate and Push Prisma Client
 
 on:
-  push:
-    paths:
-      - 'prisma/schema.prisma'
   workflow_dispatch:
 
 jobs:
