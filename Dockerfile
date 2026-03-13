@@ -1,23 +1,27 @@
 FROM python:3.11-slim
 
+# Install system dependencies for Prisma and PostgreSQL
+RUN apt-get update && apt-get install -y libpq-dev gcc openssl && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
+# Copy the entire forked repository
 COPY . /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Install the fork in editable mode with proxy dependencies
+RUN pip install -e ".[proxy]"
 
-RUN pip install --upgrade pip
+# CRITICAL: Point Python to your pre-generated client
+# This allows 'import prisma' to resolve to /app/generated/prisma
+ENV PYTHONPATH="/app/generated/prisma:${PYTHONPATH}"
 
-RUN pip install --no-cache-dir \
-    "litellm[proxy]" \
-    prisma \
-    psycopg2-binary
+# Optimization for Render's 512MB RAM & read-only filesystem
+ENV PRISMA_BINARY_CACHE_DIR=/tmp/prisma_cache
+ENV XDG_CACHE_HOME=/tmp/xdg_cache
+ENV LITELLM_MIGRATION_DIR=/tmp/migrations
+RUN mkdir -p /tmp/prisma_cache /tmp/xdg_cache /tmp/migrations
 
-ENV PORT=7860
+EXPOSE 4000
 
-EXPOSE 7860
-
-CMD ["sh","-c","litellm --config dev_config.yaml --host 0.0.0.0 --port $PORT"]
+# Start the proxy using your fork's CLI
+CMD ["python3", "-m", "litellm.proxy.proxy_cli", "--port", "4000", "--config", "config.yaml"]
